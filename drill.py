@@ -13,7 +13,15 @@ def load_glove(filepath):
 
     Returns a dict mapping each word to a numpy array of shape (50,).
     """
-    pass
+    embeddings = {}
+    with open(filepath, "r") as f:
+        for line in f:
+            parts = line.strip().split()
+            word = parts[0]
+            vector = np.array([float(x) for x in parts[1:]])
+            embeddings[word] = vector
+    return embeddings
+
 
 
 def cosine_similarity(vec1, vec2):
@@ -21,7 +29,11 @@ def cosine_similarity(vec1, vec2):
 
     Returns a float in [-1, 1]. If either vector has zero norm, return 0.0.
     """
-    pass
+    norm1 = np.linalg.norm(vec1)
+    norm2 = np.linalg.norm(vec2)
+    if norm1 == 0 or norm2 == 0:
+        return 0.0
+    return np.dot(vec1, vec2) / (norm1 * norm2)
 
 
 def nearest_neighbors(word, embeddings, n=5):
@@ -30,7 +42,15 @@ def nearest_neighbors(word, embeddings, n=5):
     Returns a list of (word, score) tuples sorted by similarity descending,
     excluding the query word itself.
     """
-    pass
+    if word not in embeddings:
+        return []
+    word_vector = embeddings[word]
+    similarities = []
+    for w, v in embeddings.items():
+        if w != word:
+            sim = cosine_similarity(word_vector, v)
+            similarities.append((w, sim))
+    return sorted(similarities, key=lambda x: x[1], reverse=True)[:n]
 
 
 if __name__ == "__main__":
